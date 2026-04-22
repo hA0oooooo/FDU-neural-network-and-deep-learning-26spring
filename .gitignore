@@ -1,0 +1,5 @@
+__pycache__/
+
+PJ1/best_models/**
+PJ1/dataset/MNIST/**
+PJ1/saved_models/**
