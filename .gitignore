@@ -1,5 +1,8 @@
 __pycache__/
 
+lab1/cifar-10-batches-py/**
+
 PJ1/best_models/**
 PJ1/dataset/MNIST/**
 PJ1/saved_models/**
+agent.md
