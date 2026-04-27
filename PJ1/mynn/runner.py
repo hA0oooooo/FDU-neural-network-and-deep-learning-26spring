@@ -24,6 +24,7 @@ class RunnerM():
 
         num_epochs = kwargs.get("num_epochs", 0)
         log_iters = kwargs.get("log_iters", 100)
+        eval_iters = kwargs.get("eval_iters", 100)
         save_dir = kwargs.get("save_dir", "best_model")
 
         if not os.path.exists(save_dir):
@@ -59,20 +60,21 @@ class RunnerM():
                 if self.scheduler is not None:
                     self.scheduler.step()
                 
-                dev_score, dev_loss = self.evaluate(dev_set)
-                self.dev_scores.append(dev_score)
-                self.dev_loss.append(dev_loss)
+                if iteration % eval_iters == 0:
+                    dev_score, dev_loss = self.evaluate(dev_set)
+                    self.dev_scores.append(dev_score)
+                    self.dev_loss.append(dev_loss)
+                    if dev_score > best_score:
+                        save_path = os.path.join(save_dir, 'best_model.pickle')
+                        self.save_model(save_path)
+                        print(f"best accuracy performence has been updated: {best_score:.5f} --> {dev_score:.5f}")
+                        best_score = dev_score
 
                 if (iteration) % log_iters == 0:
                     print(f"epoch: {epoch}, iteration: {iteration}")
                     print(f"[Train] loss: {trn_loss}, score: {trn_score}")
                     print(f"[Dev] loss: {dev_loss}, score: {dev_score}")
 
-            if dev_score > best_score:
-                save_path = os.path.join(save_dir, 'best_model.pickle')
-                self.save_model(save_path)
-                print(f"best accuracy performence has been updated: {best_score:.5f} --> {dev_score:.5f}")
-                best_score = dev_score
         self.best_score = best_score
 
     def evaluate(self, data_set):

@@ -1,0 +1,6 @@
+CNN with data augmentation on MNIST
+train_loss: 0.10004895784906781
+train_accuracy: 0.9704
+validation_loss: 0.14611172195944283
+validation_accuracy: 0.9553
+best_validation_accuracy: 0.9571

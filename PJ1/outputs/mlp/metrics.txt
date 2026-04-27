@@ -1,0 +1,6 @@
+MLP baseline on MNIST
+train_loss: 0.7973171138372706
+train_accuracy: 0.89886
+validation_loss: 0.9727340472383401
+validation_accuracy: 0.8882
+best_validation_accuracy: 0.8885
