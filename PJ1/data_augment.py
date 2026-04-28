@@ -2,6 +2,7 @@ import gzip
 import os
 from struct import unpack
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -9,6 +10,7 @@ SEED = 309
 IMAGE_SIZE = 28
 SOURCE_DIR = os.path.join("dataset", "MNIST")
 OUTPUT_DIR = os.path.join("dataset", "MNIST_augment")
+FIGURE_DIR = os.path.join("outputs", "figures")
 
 
 def read_mnist_images(path):
@@ -105,6 +107,50 @@ def build_augmented_train_set(images, labels, prob=0.5, seed=SEED):
     return aug_images.reshape(images.shape[0], -1).astype(np.float32), labels.copy()
 
 
+def save_examples(images):
+    os.makedirs(FIGURE_DIR, exist_ok=True)
+    rng = np.random.default_rng(SEED)
+
+    rows = [
+        ("rotation U(-15, 15)", "rotate"),
+        ("translation U(-5, 5)", "translate"),
+        ("resize U(0.8, 1.2)", "resize"),
+    ]
+
+    fig = plt.figure(figsize=(6, 5.0))
+    gs = fig.add_gridspec(
+        nrows=2 * len(rows),
+        ncols=5,
+        height_ratios=[1, 0.18] * len(rows),
+        hspace=0.15,
+        wspace=0.05
+    )
+
+    for row_id, (label, transform) in enumerate(rows):
+        sample = images[rng.choice(images.shape[0], size=5, replace=False)]
+
+        for col_id, image in enumerate(sample):
+            ax = fig.add_subplot(gs[2 * row_id, col_id])
+
+            if transform == "rotate":
+                shown = rotate_image(image, rng.uniform(-15.0, 15.0))
+            elif transform == "translate":
+                shown = translate_image(image, rng.uniform(-5.0, 5.0), rng.uniform(-5.0, 5.0))
+            else:
+                shown = resize_image(image, rng.uniform(0.8, 1.2))
+
+            ax.imshow(shown, cmap="gray")
+            ax.axis("off")
+
+        label_ax = fig.add_subplot(gs[2 * row_id + 1, :])
+        label_ax.axis("off")
+        label_ax.text(0.5, 0.5, label, ha="center", va="center", fontsize=10)
+
+    fig.subplots_adjust(left=0.03, right=0.97, top=0.98, bottom=0.04)
+    fig.savefig(os.path.join(FIGURE_DIR, "dataaug.png"), dpi=150)
+    plt.close(fig)
+
+
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -115,6 +161,7 @@ def main():
 
     np.save(os.path.join(OUTPUT_DIR, "train_images.npy"), aug_images)
     np.save(os.path.join(OUTPUT_DIR, "train_labels.npy"), aug_labels)
+    save_examples(images)
 
     print(f"saved augmented training set to {OUTPUT_DIR}")
 

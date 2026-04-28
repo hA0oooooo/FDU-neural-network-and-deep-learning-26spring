@@ -2,6 +2,7 @@ import gzip
 import os
 from struct import unpack
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -9,6 +10,10 @@ SEED = 309
 IMAGE_SIZE = 28
 SOURCE_DIR = os.path.join("dataset", "MNIST")
 OUTPUT_DIR = os.path.join("dataset", "MNIST_robust")
+FIGURE_DIR = os.path.join("outputs", "figures")
+ROTATE_RANGE = (-15.0, 15.0)
+TRANSLATE_RANGE = (-5.0, 5.0)
+RESIZE_RANGE = (0.8, 1.2)
 
 
 def read_mnist_images(path):
@@ -91,11 +96,11 @@ def transform_images(images, transform, seed=SEED):
 
     for i in range(images.shape[0]):
         if transform == "rotate":
-            output[i] = rotate_image(images[i], rng.uniform(-15.0, 15.0))
+            output[i] = rotate_image(images[i], rng.uniform(*ROTATE_RANGE))
         elif transform == "translate":
-            output[i] = translate_image(images[i], rng.uniform(-5.0, 5.0), rng.uniform(-5.0, 5.0))
+            output[i] = translate_image(images[i], rng.uniform(*TRANSLATE_RANGE), rng.uniform(*TRANSLATE_RANGE))
         else:
-            output[i] = resize_image(images[i], rng.uniform(0.8, 1.2))
+            output[i] = resize_image(images[i], rng.uniform(*RESIZE_RANGE))
 
     return output.reshape(images.shape[0], -1).astype(np.float32)
 
@@ -107,11 +112,11 @@ def random_transform_images(images, seed=SEED):
     for i in range(images.shape[0]):
         transform = rng.choice(["rotate", "translate", "resize"])
         if transform == "rotate":
-            output[i] = rotate_image(images[i], rng.uniform(-15.0, 15.0))
+            output[i] = rotate_image(images[i], rng.uniform(*ROTATE_RANGE))
         elif transform == "translate":
-            output[i] = translate_image(images[i], rng.uniform(-3.0, 3.0), rng.uniform(-3.0, 3.0))
+            output[i] = translate_image(images[i], rng.uniform(*TRANSLATE_RANGE), rng.uniform(*TRANSLATE_RANGE))
         else:
-            output[i] = resize_image(images[i], rng.uniform(0.8, 1.2))
+            output[i] = resize_image(images[i], rng.uniform(*RESIZE_RANGE))
 
     return output.reshape(images.shape[0], -1).astype(np.float32)
 
@@ -121,6 +126,97 @@ def add_gaussian_noise(images, sigma, seed=SEED):
     noisy = images + rng.normal(0.0, sigma, size=images.shape)
     noisy = np.clip(noisy, 0.0, 1.0)
     return noisy.reshape(images.shape[0], -1).astype(np.float32)
+
+
+def save_robust_transform_examples(images):
+    os.makedirs(FIGURE_DIR, exist_ok=True)
+    rng = np.random.default_rng(SEED)
+
+    rows = [
+        ("rotation U(-15, 15)", "rotate"),
+        ("translation U(-5, 5)", "translate"),
+        ("resize U(0.8, 1.2)", "resize"),
+    ]
+
+    fig = plt.figure(figsize=(6, 5.0))
+    gs = fig.add_gridspec(
+        nrows=2 * len(rows),
+        ncols=5,
+        height_ratios=[1, 0.18] * len(rows),
+        hspace=0.15,
+        wspace=0.05
+    )
+
+    for row_id, (label, transform) in enumerate(rows):
+        sample = images[rng.choice(images.shape[0], size=5, replace=False)]
+
+        for col_id, image in enumerate(sample):
+            ax = fig.add_subplot(gs[2 * row_id, col_id])
+
+            if transform == "rotate":
+                shown = rotate_image(image, rng.uniform(*ROTATE_RANGE))
+            elif transform == "translate":
+                shown = translate_image(
+                    image,
+                    rng.uniform(*TRANSLATE_RANGE),
+                    rng.uniform(*TRANSLATE_RANGE)
+                )
+            else:
+                shown = resize_image(image, rng.uniform(*RESIZE_RANGE))
+
+            ax.imshow(shown, cmap="gray")
+            ax.axis("off")
+
+        label_ax = fig.add_subplot(gs[2 * row_id + 1, :])
+        label_ax.axis("off")
+        label_ax.text(0.5, 0.5, label, ha="center", va="center", fontsize=10)
+
+    fig.subplots_adjust(left=0.03, right=0.97, top=0.98, bottom=0.04)
+    fig.savefig(os.path.join(FIGURE_DIR, "robust_transform.png"), dpi=150)
+    plt.close(fig)
+
+
+def save_robust_gaussian_examples(images):
+    os.makedirs(FIGURE_DIR, exist_ok=True)
+    rng = np.random.default_rng(SEED)
+
+    rows = [
+        ("gaussian N(0, 0.05)", 0.05),
+        ("gaussian N(0, 0.10)", 0.10),
+        ("gaussian N(0, 0.20)", 0.20),
+    ]
+
+    fig = plt.figure(figsize=(6, 5.0))
+    gs = fig.add_gridspec(
+        nrows=2 * len(rows),
+        ncols=5,
+        height_ratios=[1, 0.18] * len(rows),
+        hspace=0.15,
+        wspace=0.05
+    )
+
+    for row_id, (label, sigma) in enumerate(rows):
+        sample = images[rng.choice(images.shape[0], size=5, replace=False)]
+
+        for col_id, image in enumerate(sample):
+            ax = fig.add_subplot(gs[2 * row_id, col_id])
+
+            shown = add_gaussian_noise(
+                image.reshape(1, 28, 28),
+                sigma,
+                seed=SEED + row_id * 5 + col_id
+            ).reshape(28, 28)
+
+            ax.imshow(shown, cmap="gray")
+            ax.axis("off")
+
+        label_ax = fig.add_subplot(gs[2 * row_id + 1, :])
+        label_ax.axis("off")
+        label_ax.text(0.5, 0.5, label, ha="center", va="center", fontsize=10)
+
+    fig.subplots_adjust(left=0.03, right=0.97, top=0.98, bottom=0.04)
+    fig.savefig(os.path.join(FIGURE_DIR, "robust_gaussian.png"), dpi=150)
+    plt.close(fig)
 
 
 def main():
@@ -141,6 +237,9 @@ def main():
     for sigma in [0.05, 0.10, 0.20]:
         noisy = add_gaussian_noise(images, sigma, seed=SEED)
         np.save(os.path.join(OUTPUT_DIR, f"test_gaussian_{sigma:.2f}.npy"), noisy)
+
+    save_robust_transform_examples(images)
+    save_robust_gaussian_examples(images)
 
     print(f"saved robustness test sets to {OUTPUT_DIR}")
 
