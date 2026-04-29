@@ -42,7 +42,7 @@ train_labs = train_labs[10000:]
 train_imgs = (train_imgs / train_imgs.max()).astype(np.float32)
 valid_imgs = (valid_imgs / valid_imgs.max()).astype(np.float32)
 
-'''
+
 # partA: mlp baseline
 
 output_dir_mlp = './outputs/mlp'
@@ -91,8 +91,8 @@ plot(runner, axes)
 figure_path = os.path.join(output_dir_mlp, 'learning_curve.png')
 plt.savefig(figure_path, dpi=150)
 plt.show()
-'''
-'''
+
+
 # partB: cnn
 
 output_dir_cnn = './outputs/cnn'
@@ -144,7 +144,7 @@ plot(cnn_runner, axes)
 cnn_figure_path = os.path.join(output_dir_cnn, 'learning_curve.png')
 plt.savefig(cnn_figure_path, dpi=150)
 plt.show()
-'''
+
 
 # partC: data augmentation and robustness analysis
 

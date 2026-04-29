@@ -13,13 +13,13 @@ args = parser.parse_args()
 
 if args.model == "mlp":
         model = nn.models.Model_MLP()
-        model_path = r'.\outputs\mlp\best_model.pickle'
+        model_path = r'.\outputs\mlp\mlp.pickle'
 if args.model == "cnn":
         model = nn.models.Model_CNN()
-        model_path = r'.\outputs\cnn\best_model.pickle'
+        model_path = r'.\outputs\cnn\cnn.pickle'
 if args.model == "cnn_dataaug":
         model = nn.models.Model_CNN()
-        model_path = r'.\outputs\cnn_dataaug\best_model.pickle'
+        model_path = r'.\outputs\cnn_dataaug\cnn_dataaug.pickle'
 
 model.load_model(model_path)
 
