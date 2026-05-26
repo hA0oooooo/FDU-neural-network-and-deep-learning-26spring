@@ -1,0 +1,22 @@
+seed: 42
+id: vgga_bn_lr_5e_4
+
+data:
+  data_dir: ./data
+  batch_size: 512
+  num_workers: 8
+  mean: [0.4914, 0.4822, 0.4465]
+  std: [0.2470, 0.2435, 0.2616]
+
+model:
+  name: vgg_a_batchnorm
+  use_batchnorm: true
+  dropout: 0.0
+
+train:
+  epochs: 100
+  optimizer: adam
+  lr: 0.0005
+  weight_decay: 0.0
+  scheduler: none
+  use_amp: true

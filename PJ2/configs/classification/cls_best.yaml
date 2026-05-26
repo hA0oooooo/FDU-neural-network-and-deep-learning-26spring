@@ -1,0 +1,36 @@
+seed: 42
+id: cls_best
+
+data:
+  data_dir: ./data
+  val_size: 5000
+  batch_size: 512
+  num_workers: 4
+  mean: [0.4914, 0.4822, 0.4465]
+  std: [0.2470, 0.2435, 0.2616]
+
+model:
+  channels: [120, 240, 480, 960]
+  blocks_per_stage: [2, 2, 2, 2]
+  hidden_dim: 1280
+  activation: silu
+  use_batchnorm: true
+  dropout: 0.2
+  use_residual: true
+
+train:
+  epochs: 500
+  optimizer: sgd
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 0.0005
+  scheduler: cosine
+  loss: cross_entropy
+  label_smoothing: 0.05
+  cutmix:
+    enabled: true
+    alpha: 1.0
+  sam:
+    enabled: false
+    rho: 0.02
+  use_amp: true

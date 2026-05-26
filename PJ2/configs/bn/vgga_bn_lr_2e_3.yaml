@@ -1,0 +1,31 @@
+seed: 42
+id: vgga_bn_lr_2e_3
+
+data:
+  data_dir: ./data
+  batch_size: 512
+  num_workers: 8
+  mean: [0.4914, 0.4822, 0.4465]
+  std: [0.2470, 0.2435, 0.2616]
+
+model:
+  name: vgg_a_batchnorm
+  use_batchnorm: true
+  dropout: 0.0
+
+train:
+  epochs: 100
+  optimizer: adam
+  lr: 0.002
+  weight_decay: 0.0
+  scheduler: none
+  use_amp: true
+
+analysis:
+  enabled: true
+  every_n_steps: 24
+  rho: 0.05
+  distances: [0.01, 0.02, 0.05]
+
+output:
+  save_checkpoint: false
