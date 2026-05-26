@@ -2,3 +2,4 @@
 
 * Lab 1 – The Basics of Python and Pytorch
 * Project-1 of "Neural Network and Deep Learning"
+* Project-2 of "Neural Network and Deep Learning"
